@@ -11,15 +11,8 @@ app.use(cors());
 const repositories = [];
 
 app.get("/repositories", (request, response) => {
-  // const { id, title, url, techs, likes } = request.query;
-
-  // const results = title
-  //   ? projects.filter(project.title.includes(title))
-  //   : projects;
-
   return response.json(repositories);
-});
-  
+}); 
 
 app.post("/repositories", (request, response) => {
   const { title, url, techs} = request.body;
@@ -39,11 +32,16 @@ app.put("/repositories/:id", (request, response) => {
   if (repositoryIndex < 0){
     return response.status(400).json({ error: "Project not found"});
   }
+// Operador condicional (ternário)
+// condicao ? valor1 : valor2
+// Se condicao for verdadeira, o operador terá o valor de valor1. Caso contrário, terá o valor de valor2.
 
   const repository = {
-    title,
-    url,
-    techs,
+    id,
+    title: title ? title : repositories[repositoryIndex].title,
+    url: url ? url : repositories[repositoryIndex].url,
+    techs: techs ? techs : repositories[repositoryIndex].techs,
+    likes: repositories[repositoryIndex].likes
   };
 
   repositories[repositoryIndex] = repository;
@@ -52,11 +50,32 @@ app.put("/repositories/:id", (request, response) => {
 });
 
 app.delete("/repositories/:id", (request, response) => {
-  // TODO
+  const { id } = request.params;
+  
+  const repositoryIndex = repositories.findIndex((repository) => repository.id === id);
+
+  if (repositoryIndex < 0) {
+    return response.status(400).json({ error: "Project not found" });
+  }
+
+  repositories.splice(repositoryIndex, 1);
+
+  return response.status(204).send();
+
 });
 
 app.post("/repositories/:id/like", (request, response) => {
-  // TODO
+  const { id } = request.params;
+
+  const repositoryIndex = repositories.findIndex((repository) => repository.id === id);
+
+  if (repositoryIndex < 0) {
+    return response.status(400).json({ error: "Project not found" });
+  }
+
+  repositories[repositoryIndex].likes += 1;
+
+  return response.json(repositories[repositoryIndex]);
 });
 
 module.exports = app;
